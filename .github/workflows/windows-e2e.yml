@@ -1,0 +1,38 @@
+name: Windows e2e
+
+on:
+  workflow_run:
+    workflows: [Build Windows installer]
+    types:
+      - completed
+  
+jobs:
+  windows:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        windows-version: ['11']
+        windows-featurepack: ['23h2-ent']
+
+    steps:
+
+      - name: Download GH context  
+        id: download-gh-context-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ github.event.workflow_run.workflow_id }}
+          name: gh_context
+
+      - name: Add status in PR checks
+        run: |
+          set -Eeuo pipefail
+          OWNER_REPO=$(cat gh_context.json | jq -r '.repository')
+          AFTER=$(cat gh_context.json | jq -r '.event.after')
+
+          curl -L -v \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ github.token }}" \
+          https://api.github.com/repos/${OWNER_REPO}/statuses/${AFTER} \
+          -d '{"state":"pending", "description":"Running e2e on Windows", "context":"win-ci-e2e"}'
