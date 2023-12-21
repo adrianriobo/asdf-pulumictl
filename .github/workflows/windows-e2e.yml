@@ -14,7 +14,7 @@ jobs:
       matrix:
         windows-version: ['11']
         windows-featurepack: ['23h2-ent']
-
+    
     steps:
 
       - name: Download GH context  
@@ -24,15 +24,23 @@ jobs:
           workflow: ${{ github.event.workflow_run.workflow_id }}
           name: gh_context
 
-      - name: Add status in PR checks
+      - name: Create e2e results
+        id: create-e2e-results
         run: |
-          set -Eeuo pipefail
-          OWNER_REPO=$(cat gh_context.json | jq -r '.repository')
           AFTER=$(cat gh_context.json | jq -r '.event.after')
+          echo "SHA_ID=${AFTER}" >> "$GITHUB_ENV"
+          cat > e2e-results.xml << EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <INTRO>
+          <title>pass/fail</title>
+          </INTRO>
+          EOF
 
-          curl -L -v \
-          -X POST \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ github.token }}" \
-          https://api.github.com/repos/${OWNER_REPO}/statuses/${AFTER} \
-          -d '{"state":"pending", "description":"Running e2e on Windows", "context":"win-ci-e2e"}'
+      - name: Upload Artifact
+        id: upload-e2e-results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: "results-${{env.SHA_ID}}"
+          path: |
+            **/e2e-results.xml
