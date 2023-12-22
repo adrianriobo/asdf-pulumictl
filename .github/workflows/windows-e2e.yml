@@ -9,6 +9,8 @@ on:
 jobs:
   windows:
     runs-on: ubuntu-latest
+    permissions:
+      statuses: write
     strategy:
       fail-fast: false
       matrix:
