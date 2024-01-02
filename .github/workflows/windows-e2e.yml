@@ -33,7 +33,7 @@ jobs:
 
           COMMIT_ID=$(cat gh_context.json | jq -r '.event.after')
           # if this is a new PR, .event.after is empty, use .sha instead in that case
-          if [[ -z "$COMMIT_ID"]]; then
+          if [[ -z "$COMMIT_ID" ]]; then
             COMMIT_ID=$(cat gh_context.json | jq -r '.sha')
           fi
 
