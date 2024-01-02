@@ -66,8 +66,8 @@ jobs:
         run: |
 
           OUTCOME="success"
-          if [[ ${{steps.test-report.outcome}} != "success"]]; then 
-            OUTCOME="failure";
+          if [[ ${{steps.test-report.outcome}} != "success" ]]; then 
+            OUTCOME="failure"
           fi
 
           DESCRIPTION="Finished e2e on Windows"
