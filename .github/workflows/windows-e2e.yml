@@ -64,6 +64,7 @@ jobs:
       - name: Update status of the PR check
         if: always()
         run: |
+          set -xuo
 
           OUTCOME="success"
           if [[ ${{steps.test-report.outcome}} != "success" ]]; then 
@@ -72,9 +73,6 @@ jobs:
 
           DESCRIPTION="Finished e2e on Windows"
           CONTEXT="win-ci-e2e"
-          JSON_MESSAGE="{\"state\":\"${OUTCOME}\", \"description\":\"${DESCRIPTION}\", \"context\":\"${CONTEXT}\", \"target_url\":\"https\:\/\/github\.com\/${{ github.repository }}\/actions\/runs\/${{ github.run_id }}\"}"
-
-          echo $JSON_MESSAGE
 
           # post result to commit status
           curl -L -v \
@@ -82,4 +80,4 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ github.token }}" \
           https://api.github.com/repos/${{ github.repository }}/statuses/${{ env.COMMIT_SHA }} \
-          -d ${JSON_MESSAGE}
+          -d "{\"state\":\"${OUTCOME}\", \"description\":\"${DESCRIPTION}\", \"context\":\"${CONTEXT}\", \"target_url\":\"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
